@@ -9,9 +9,9 @@ public class ThreadOrdenadora extends Thread {
 
     @Override
     public void run() {
-        System.out.println("[LOG]" + getName() + "Iniciou a ordenacao de " + parte.length + "elementos.");
-    
-    this.resultado = MergeSort.mergeSort(parte);
+        System.out.println("[LOG] " + getName() + " iniciou a ordenacao de " + parte.length + " elementos.");
+
+        this.resultado = MergeSort.sort(parte);
     }
 
     public byte[] getResultado() {

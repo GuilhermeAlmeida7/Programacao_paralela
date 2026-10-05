@@ -1,22 +1,66 @@
-### ⚙️ Módulo Paralelo (Matheus - Elemento A)
+# Programacao Paralela
 
-As classes responsáveis pelo processamento paralelo (`ThreadOrdenadora` e `ThreadJuntadora`) foram implementadas estendendo a classe nativa `Thread` do Java. Para o correto funcionamento e integração com as demais partes do projeto, observe os seguintes pontos:
+Projeto de comparacao entre Merge Sort sequencial e Merge Sort paralelo para vetores de `byte`.
 
-1. **Dependência de Contratos (Parte B):** 
-   O módulo paralelo não implementa a lógica do algoritmo, mas sim a orquestração. Ele assume que a classe `MergeSort` possui os seguintes métodos estáticos e públicos:
-   - `MergeSort.sort(byte[] v)` — chamado pelas *ThreadOrdenadoras*.
-   - `MergeSort.merge(byte[] a, byte[] b)` — chamado pelas *ThreadJuntadoras*.
-   *(Atenção: Qualquer alteração na assinatura desses métodos quebrará a compilação do módulo paralelo).*
+## Estrutura
 
-2. **Extração de Resultados e Sincronismo:** 
-   O fluxo assíncrono exige que os resultados sejam extraídos apenas após a conclusão da thread. Para recuperar os vetores, o fluxo coordenador (`OrdenadorParalelo`) deve obrigatoriamente:
-   - Iniciar a thread com `thread.start()`
-   - Aguardar sua finalização usando `thread.join()`
-   - Recuperar o valor final com `thread.getResultado()`
-   *(Tentar usar `getResultado()` antes do `join()` retornará `null`).*
+- `src/MergeSort.java`: algoritmo base sequencial e merge de dois vetores ordenados.
+- `src/MainSequencial.java`: execucao sem paralelismo, com menu, logs e medicao de tempo.
+- `src/ThreadOrdenadora.java`: thread que ordena uma parte do vetor.
+- `src/ThreadJuntadora.java`: thread que junta dois vetores ordenados.
+- `src/OrdenadorParalelo.java`: divide o vetor, dispara threads e junta os resultados.
+- `src/MainParalelo.java`: execucao paralela, com menu, logs e medicao de tempo.
+- `src/Util.java`: leitura, geracao e impressao de vetores.
+- `src/MaiorVetorAproximado.java`: estimativa de maior vetor suportado com memoria limitada.
+- `src/TestesOrdenacao.java`: comparacao automatica entre ordenacao sequencial e paralela.
+- `docs/diario.md`: registro das atividades com data e hora.
+- `docs/relato.md`: resumo dos testes e conclusao.
+- `docs/prints/`: capturas de tela dos programas em execucao.
 
-3. **Rastreabilidade (Logs):** 
-   Para cumprir os requisitos do enunciado, as threads emitem avisos no console indicando a quantidade de elementos processados. O formato padronizado adotado é: `[LOG] NomeDaThread ...`
+## Compilacao
 
-4. **Consumo de Memória:** 
-   Como o MergeSort cria novos arrays a cada divisão/junção, o paralelismo exige bastante da RAM. Para testes com vetores próximos ao limite da máquina (`MaiorVetorAproximado`), é obrigatório rodar o `MainParalelo` com a flag de alocação da JVM (ex: `java -Xmx8G MainParalelo`), evitando `OutOfMemoryError`.
+```sh
+javac src/*.java
+```
+
+## Execucao dos programas principais
+
+```sh
+java -cp src MainSequencial
+java -cp src MainParalelo
+```
+
+## Execucao dos testes
+
+Com tamanhos padrao:
+
+```sh
+java -cp src TestesOrdenacao
+```
+
+Com tamanhos escolhidos:
+
+```sh
+java -cp src TestesOrdenacao 1000 10000 100000 1000000
+```
+
+## Execucao do teste de memoria
+
+```sh
+java -Xmx8G -cp src MaiorVetorAproximado
+```
+
+## Contratos usados na integracao
+
+```java
+public static byte[] sort(byte[] v)
+public static byte[] merge(byte[] a, byte[] b)
+public static byte[] ordenar(byte[] v)
+public static byte[] gerarAleatorio(int n)
+public static byte[] lerManual(int n)
+public static void imprimir(byte[] v, int ini, int fim)
+```
+
+## Observacoes
+
+As threads usam `start()` e `join()` para garantir que os resultados sejam recuperados somente apos a finalizacao. Os logs no console indicam as etapas da ordenacao e ajudam na demonstracao do funcionamento.
